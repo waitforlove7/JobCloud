@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { Analytics, track } from "@vercel/analytics/react";
 import { Activity, ArrowDownRight, BriefcaseBusiness, Layers3, Search, Sparkles } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector, Tooltip } from "recharts";
 import jobsPayload from "../bytedance_jobs.json";
@@ -14,12 +15,17 @@ function App() {
     return backend ? { id: backend.id, type: backend.type } : null;
   });
   const handleSelect = useCallback((nextSelection) => {
+    const node = graph.nodeById.get(nextSelection.id);
+    track("graph_node_selected", {
+      node_type: nextSelection.type,
+      node_label: node?.label || nextSelection.id,
+    });
     setSelected((current) =>
       current?.type === "category" && nextSelection?.type === "category" && current.id === nextSelection.id
         ? null
         : nextSelection,
     );
-  }, []);
+  }, [graph]);
 
   const selectedNode = selected ? graph.nodeById.get(selected.id) : null;
   const selectedCategory =
@@ -49,7 +55,9 @@ function App() {
           <p>
             把分散的职位描述变成一张可探索的技能星图。快速比较岗位大类、技能热度与职业方向，找到下一步最值得投入的能力。
           </p>
-          <a className="hero-cta" href="#explore">开始探索 <ArrowDownRight size={17} /></a>
+          <a className="hero-cta" href="#explore" onClick={() => track("explore_started")}>
+            开始探索 <ArrowDownRight size={17} />
+          </a>
         </div>
         <div className="metric-grid" aria-label="数据概览">
           <Metric icon={<BriefcaseBusiness />} label="岗位" value={graph.stats.totalJobs} />
@@ -114,7 +122,13 @@ function InfoPanel({ graph, selectedNode, selectedCategory }) {
           <p className="panel-kicker">职位</p>
           <h2>{job.label}</h2>
           <p className="muted">所属大类：{selectedCategory?.label || "其他"}</p>
-          <a className="primary-link" href={job.url} target="_blank" rel="noreferrer">
+          <a
+            className="primary-link"
+            href={job.url}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => trackJobLink(job)}
+          >
             查看原始岗位
           </a>
         </div>
@@ -406,7 +420,13 @@ function JobInfoCard({ job, category, embedded = false }) {
       <p className="panel-kicker">岗位信息</p>
       <h3>{job.label}</h3>
       <p className="muted">所属大类：{category?.label || "其他"}</p>
-      <a className="primary-link" href={job.url} target="_blank" rel="noreferrer">
+      <a
+        className="primary-link"
+        href={job.url}
+        target="_blank"
+        rel="noreferrer"
+        onClick={() => trackJobLink(job)}
+      >
         查看原始岗位
       </a>
       <div className="job-detail-block">
@@ -438,4 +458,16 @@ function TopSkillList({ title, skills }) {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+function trackJobLink(job) {
+  track("job_link_opened", {
+    job_id: job.id,
+    job_title: job.label,
+  });
+}
+
+createRoot(document.getElementById("root")).render(
+  <>
+    <App />
+    <Analytics />
+  </>,
+);

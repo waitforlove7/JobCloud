@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import jobsPayload from "../example.json" with { type: "json" };
 import { buildJobGraph } from "./jobGraph.js";
-import { buildSkillDagModel, evaluateSkillDag } from "./skillDag.js";
+import { buildSkillDagModel, evaluateSkillDag, suggestedSkillRowsForCategory } from "./skillDag.js";
 
 test("builds a DAG with every skill and without product or other endpoints", () => {
   const graph = buildJobGraph(jobsPayload);
@@ -49,4 +49,26 @@ test("lights a category when one complete high-frequency combination is selected
   assert.equal(match.matchedCount, 3);
   assert.equal(match.unlocked, true);
   assert.deepEqual(match.best.missingSkills, []);
+});
+
+test("suggests five rows while combining unselected programming languages", () => {
+  const graph = buildJobGraph(jobsPayload);
+  const model = buildSkillDagModel(graph);
+  const backend = model.categories.find((category) => category.key === "backend");
+  const selectedIds = backend.combinations[0].skills.map((skill) => skill.id);
+  const suggestions = suggestedSkillRowsForCategory(graph, backend.id, selectedIds);
+  const languageRow = suggestions.find((skill) => skill.isLanguageGroup);
+  const programmingLanguages = new Set(["Python", "C/C++", "Go", "Java", "JS/TS", "Rust"]);
+  const ranking = graph.skillRankingByCategory.get(backend.id).filter((skill) => !selectedIds.includes(skill.id));
+  const expectedLanguages = ranking.filter((skill) => programmingLanguages.has(skill.label));
+  const expectedOtherSkills = ranking.filter((skill) => !programmingLanguages.has(skill.label)).slice(0, 4);
+
+  assert.equal(suggestions.length, 5);
+  assert.equal(suggestions.filter((skill) => skill.isLanguageGroup).length, 1);
+  assert.equal(languageRow.label, `编程语言：${expectedLanguages.map((skill) => skill.label).join(" / ")}`);
+  assert.equal(languageRow.label.includes("Go"), false);
+  assert.deepEqual(
+    suggestions.filter((skill) => !skill.isLanguageGroup).map((skill) => skill.label),
+    expectedOtherSkills.map((skill) => skill.label),
+  );
 });

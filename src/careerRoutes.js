@@ -21,14 +21,14 @@ export const CAREER_ROUTE_DEFINITIONS = [
     categoryKey: "backend",
     color: "#5b8cff",
     description: "设计可靠的服务、数据链路和分布式业务系统。",
-    requiredSkills: ["分布式系统", "MySQL", "Redis", "消息队列"],
+    requiredSkills: ["分布式系统", "MySQL", "Redis"],
     choiceGroups: [
       { label: "语言任选 1 项", min: 1, skills: ["Go", "Java", "Python", "C/C++"] },
       { label: "架构任选 1 项", min: 1, skills: ["RPC", "微服务"] },
     ],
     tiers: [
       { label: "基础", skills: ["Go", "Java", "Python", "C/C++"] },
-      { label: "工程", skills: ["MySQL", "Redis", "消息队列"] },
+      { label: "工程", skills: ["MySQL", "Redis"] },
       { label: "方向", skills: ["分布式系统", "RPC", "微服务"] },
     ],
   },

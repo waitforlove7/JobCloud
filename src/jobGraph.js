@@ -174,7 +174,7 @@ export const SKILL_RULES = [
   ["BGP", ["BGP"]],
   ["VXLAN", ["VXLAN", "VxLAN"]],
   ["MySQL", ["MySQL", "Mysql"]],
-  ["Redis", ["Redis"]],
+  ["Redis", ["Redis", "消息队列", "MQ"]],
   ["NoSQL", ["NoSQL", "NOSQL", "nosql"]],
   ["RocksDB", ["RocksDB", "Rocks DB"]],
   ["Pika", ["Pika", "pika"]],
@@ -213,7 +213,6 @@ export const SKILL_RULES = [
   ["分布式系统", ["分布式系统", "分布式"]],
   ["微服务", ["微服务"]],
   ["RPC", ["RPC"]],
-  ["消息队列", ["消息队列", "MQ"]],
   ["机器学习", ["机器学习", "ML"]],
   ["深度学习", ["深度学习"]],
   ["推荐系统", ["推荐系统", "推荐算法"]],
@@ -441,6 +440,12 @@ export function jobsMatchingAllSkills(graph, skillIds) {
   return (graph.jobsBySkill.get(firstSkillId) || []).filter((job) =>
     remainingSkillIds.every((skillId) => job.skillIds.includes(skillId)),
   );
+}
+
+export function sortRelatedJobs(jobs, categoryKey) {
+  if (categoryKey !== "frontend") return jobs;
+  const isFullStack = (job) => /全栈|full[-_\s]*stack/i.test(job.label || job.rawTitle || "");
+  return [...jobs].sort((a, b) => Number(isFullStack(b)) - Number(isFullStack(a)));
 }
 
 export function rankSkillTriples(jobs, nodeById) {

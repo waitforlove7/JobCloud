@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildSkillDagModel, evaluateSkillDag } from "./skillDag.js";
+import { buildSkillDagModel, evaluateSkillDag, suggestedSkillRowsForCategory } from "./skillDag.js";
 
 const VIEWBOX = { width: 1000, height: 1100 };
 const CATEGORY_HIGHLIGHT_THRESHOLD = 2;
@@ -101,7 +101,6 @@ export function SkillDag({ graph, selectedSkillIds, onToggleSkill }) {
           </marker>
         </defs>
         <text className="skill-dag-layer-label" x="36" y="32">岗位大类 · DAG 终点</text>
-        <text className="skill-dag-layer-label" x="36" y="260">全部技能 · DAG 起点</text>
 
         <g className="skill-dag-edges" aria-hidden="true">
           {model.edges.map((edge) => {
@@ -137,12 +136,14 @@ export function SkillDag({ graph, selectedSkillIds, onToggleSkill }) {
               onPointerUp={(event) => finishDrag(event)}
               onPointerCancel={(event) => finishDrag(event)}
             >
-              <circle className="skill-dag-category-halo" r="48" />
-              <circle className="skill-dag-category-core" r="38" style={{ "--category-color": category.color }} />
-              <text className="skill-dag-category-label" textAnchor="middle" y="-3">{category.label}</text>
-              <text className="skill-dag-category-score" textAnchor="middle" y="16">
-                {match?.unlocked ? "已点亮" : `${match?.matchedCount || 0}/${match?.total || 3}`}
-              </text>
+              <g className="skill-dag-category-visual">
+                <circle className="skill-dag-category-halo" r="42" />
+                <circle className="skill-dag-category-core" r="40" style={{ "--category-color": category.color }} />
+                <text className="skill-dag-category-label" textAnchor="middle" y="-3">{category.label}</text>
+                <text className="skill-dag-category-score" textAnchor="middle" y="16">
+                  {match?.unlocked ? "已点亮" : `${match?.matchedCount || 0}/${match?.total || 3}`}
+                </text>
+              </g>
             </g>
           );
         })}
@@ -184,14 +185,16 @@ export function SkillDag({ graph, selectedSkillIds, onToggleSkill }) {
                   repeatCount="indefinite"
                 />
               )}
-              <circle className="skill-dag-skill-core" r="20" />
-              <text className="skill-dag-skill-label" textAnchor="middle">
-                {labelLines.map((line, index) => (
-                  <tspan key={`${line}:${index}`} x="0" y={(index - (labelLines.length - 1) / 2) * 8 + 2}>
-                    {line}
-                  </tspan>
-                ))}
-              </text>
+              <g className="skill-dag-skill-visual">
+                <circle className="skill-dag-skill-core" r="28" />
+                <text className="skill-dag-skill-label" textAnchor="middle">
+                  {labelLines.map((line, index) => (
+                    <tspan key={`${line}:${index}`} x="0" y={(index - (labelLines.length - 1) / 2) * 8 + 2}>
+                      {line}
+                    </tspan>
+                  ))}
+                </text>
+              </g>
             </g>
           );
         })}
@@ -233,18 +236,37 @@ export function SkillDagPanel({ graph, selectedSkillIds, onToggleSkill }) {
         <h3>推荐方向</h3>
         {recommendations.length > 0 ? (
           <div className="skill-dag-recommendations">
-            {recommendations.map((match, index) => (
-              <div key={match.category.id} className={index === 0 ? "is-best" : ""}>
-                <span style={{ "--category-color": match.category.color }}>{index + 1}</span>
-                <strong>{match.category.label}</strong>
-                <em>{match.matchedCount}/{match.total}</em>
-                <small>
-                  {match.unlocked
-                    ? "高频组合已点亮"
-                    : `建议补充：${match.best.missingSkills.map((skill) => skill.label).join("、")}`}
-                </small>
-              </div>
-            ))}
+            {recommendations.map((match, index) => {
+              const suggestedSkills = match.unlocked
+                ? suggestedSkillRowsForCategory(graph, match.category.id, selectedSkillIds)
+                : [];
+              return (
+                <div key={match.category.id} className={index === 0 ? "is-best" : ""}>
+                  <span style={{ "--category-color": match.category.color }}>{index + 1}</span>
+                  <strong>{match.category.label}</strong>
+                  <em>{match.matchedCount}/{match.total}</em>
+                  <small>
+                    {match.unlocked
+                      ? "高频组合已点亮"
+                      : `建议补充：${match.best.missingSkills.map((skill) => skill.label).join("、")}`}
+                  </small>
+                  {suggestedSkills.length > 0 ? (
+                    <div className="skill-dag-suggestions">
+                      <b>建议补充的其他技能</b>
+                      <ol>
+                        {suggestedSkills.map((skill, skillIndex) => (
+                          <li key={skill.id} className={skill.isLanguageGroup ? "is-language-group" : ""}>
+                            <span>{skillIndex + 1}</span>
+                            <strong>{skill.label}</strong>
+                            <em>{skill.countLabel}</em>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className="muted">选择技能后，这里只展示匹配度最高的三个大类。</p>

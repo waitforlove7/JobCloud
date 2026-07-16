@@ -4,7 +4,7 @@ import { Analytics, track } from "@vercel/analytics/react";
 import { Activity, ArrowDownRight, BriefcaseBusiness, Layers3, Search, Sparkles } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector, Tooltip } from "recharts";
 import jobsPayload from "../bytedance_jobs.json";
-import { buildJobGraph, jobsMatchingAllSkills } from "./jobGraph.js";
+import { buildJobGraph, jobsMatchingAllSkills, sortRelatedJobs } from "./jobGraph.js";
 import { JobGalaxy } from "./JobGalaxy.jsx";
 import { SkillDag, SkillDagPanel } from "./SkillDag.jsx";
 import "./styles.css";
@@ -16,11 +16,13 @@ function App() {
   const [skillCategoryFilterId, setSkillCategoryFilterId] = useState(null);
   const [selectedSkillIds, setSelectedSkillIds] = useState([]);
   const [masteredSkillIds, setMasteredSkillIds] = useState([]);
+  const [relatedJobId, setRelatedJobId] = useState(null);
   const [selected, setSelected] = useState(() => {
     const backend = graph.categories.find((category) => category.key === "backend");
     return backend ? { id: backend.id, type: backend.type } : null;
   });
   const handleSelect = useCallback((nextSelection) => {
+    setRelatedJobId(null);
     setSkillCategoryFilterId(null);
     if (!nextSelection) {
       setSelected(null);
@@ -41,6 +43,7 @@ function App() {
   }, [graph, selected]);
 
   const handleSkillSelect = useCallback((nextSelection, { additive = false } = {}) => {
+    setRelatedJobId(null);
     if (!additive) {
       handleSelect(nextSelection);
       return;
@@ -60,6 +63,7 @@ function App() {
   }, [handleSelect, selected, selectedSkillIds]);
 
   const selectedNode = selected ? graph.nodeById.get(selected.id) : null;
+  const galaxySelection = relatedJobId ? { id: relatedJobId, type: "job" } : selected;
   const selectedCategory =
     selectedNode?.type === "category"
       ? selectedNode
@@ -79,6 +83,14 @@ function App() {
     setMasteredSkillIds((current) =>
       current.includes(skillId) ? current.filter((id) => id !== skillId) : [...current, skillId],
     );
+  }, []);
+  const handleSkillCategoryFilterChange = useCallback((categoryId) => {
+    setRelatedJobId(null);
+    setSkillCategoryFilterId(categoryId);
+  }, []);
+  const handleSkillViewModeChange = useCallback((nextMode) => {
+    setRelatedJobId(null);
+    setSkillViewMode(nextMode);
   }, []);
 
   return (
@@ -117,7 +129,7 @@ function App() {
         <div className="scene-wrap">
           <ViewToggle activeView={layerView} onChange={handleLayerViewChange} />
           {layerView === "skill" && (
-            <SkillViewToggle activeView={skillViewMode} onChange={setSkillViewMode} />
+            <SkillViewToggle activeView={skillViewMode} onChange={handleSkillViewModeChange} />
           )}
           {layerView === "skill" && skillViewMode === "dag" ? (
             <SkillDag
@@ -128,7 +140,7 @@ function App() {
           ) : (
             <JobGalaxy
               graph={graph}
-              selected={selected}
+              selected={galaxySelection}
               selectedSkillIds={selectedSkillIds}
               onSelect={handleSelect}
               layerView={layerView}
@@ -150,8 +162,10 @@ function App() {
             layerView={layerView}
             skillCategoryFilterId={skillCategoryFilterId}
             selectedSkillIds={selectedSkillIds}
-            onSkillCategoryFilterChange={setSkillCategoryFilterId}
+            selectedRelatedJobId={relatedJobId}
+            onSkillCategoryFilterChange={handleSkillCategoryFilterChange}
             onCategorySelect={(categoryId) => handleSelect(categoryId ? { id: categoryId, type: "category" } : null)}
+            onRelatedJobSelect={(jobId) => setRelatedJobId((current) => (current === jobId ? null : jobId))}
             onSkillSelect={handleSkillSelect}
           />
         )}
@@ -207,8 +221,10 @@ function InfoPanel({
   layerView,
   skillCategoryFilterId,
   selectedSkillIds,
+  selectedRelatedJobId,
   onSkillCategoryFilterChange,
   onCategorySelect,
+  onRelatedJobSelect,
   onSkillSelect,
 }) {
   const showSkillOverview = layerView === "skill";
@@ -240,7 +256,9 @@ function InfoPanel({
         category={selectedNode}
         skillOverview={showSkillOverview}
         selectedSkillIds={selectedSkillIds}
+        selectedRelatedJobId={selectedRelatedJobId}
         onCategorySelect={onCategorySelect}
+        onRelatedJobSelect={onRelatedJobSelect}
         onSkillSelect={onSkillSelect}
       />
     );
@@ -309,7 +327,9 @@ function InfoPanel({
         skillOverview={showSkillOverview}
         selectedSkillIds={selectedSkillIds}
         activeCategoryId={skillCategoryFilterId}
+        selectedRelatedJobId={selectedRelatedJobId}
         onCategoryFilterChange={onSkillCategoryFilterChange}
+        onRelatedJobSelect={onRelatedJobSelect}
         onSkillSelect={onSkillSelect}
       />
     );
@@ -318,15 +338,19 @@ function InfoPanel({
   return null;
 }
 
-function CategoryPanel({ graph, category, skillOverview, selectedSkillIds, onCategorySelect, onSkillSelect }) {
-  const jobs = graph.jobsByCategory.get(category.id) || [];
+function CategoryPanel({
+  graph,
+  category,
+  skillOverview,
+  selectedSkillIds,
+  selectedRelatedJobId,
+  onCategorySelect,
+  onRelatedJobSelect,
+  onSkillSelect,
+}) {
+  const jobs = sortRelatedJobs(graph.jobsByCategory.get(category.id) || [], category.key);
   const ranking = graph.skillRankingByCategory.get(category.id) || [];
   const combinations = graph.skillTripleRankingByCategory.get(category.id) || [];
-  const [activeJobId, setActiveJobId] = useState(null);
-
-  useEffect(() => {
-    setActiveJobId(null);
-  }, [category.id]);
 
   return (
     <InfoShell
@@ -354,8 +378,8 @@ function CategoryPanel({ graph, category, skillOverview, selectedSkillIds, onCat
               key={job.id}
               job={job}
               category={category}
-              active={job.id === activeJobId}
-              onToggle={() => setActiveJobId((current) => (current === job.id ? null : job.id))}
+              active={job.id === selectedRelatedJobId}
+              onToggle={() => onRelatedJobSelect(job.id)}
             />
           ))}
         </div>
@@ -405,7 +429,9 @@ function SkillPanel({
   skillOverview,
   selectedSkillIds,
   activeCategoryId,
+  selectedRelatedJobId,
   onCategoryFilterChange,
+  onRelatedJobSelect,
   onSkillSelect,
 }) {
   const activeSkillIds = selectedSkillIds.length > 0 ? selectedSkillIds : [skill.id];
@@ -415,22 +441,16 @@ function SkillPanel({
   const groupedJobs = graph.categories
     .map((category) => ({
       category,
-      jobs: jobs.filter((job) => job.categoryId === category.id),
+      jobs: sortRelatedJobs(jobs.filter((job) => job.categoryId === category.id), category.key),
     }))
     .filter((group) => group.jobs.length > 0)
     .sort((a, b) => b.jobs.length - a.jobs.length || a.category.label.localeCompare(b.category.label));
-  const [activeJobId, setActiveJobId] = useState(null);
   const visibleGroups = activeCategoryId
     ? groupedJobs.filter((group) => group.category.id === activeCategoryId)
     : groupedJobs;
 
-  useEffect(() => {
-    setActiveJobId(null);
-  }, [skill.id, selectedSkillIds]);
-
   const handleCategoryFilter = (categoryId) => {
     onCategoryFilterChange(categoryId);
-    setActiveJobId(null);
   };
 
   return (
@@ -461,8 +481,8 @@ function SkillPanel({
                       key={job.id}
                       job={job}
                       category={group.category}
-                      active={job.id === activeJobId}
-                      onToggle={() => setActiveJobId((current) => (current === job.id ? null : job.id))}
+                      active={job.id === selectedRelatedJobId}
+                      onToggle={() => onRelatedJobSelect(job.id)}
                     />
                   ))}
                 </div>

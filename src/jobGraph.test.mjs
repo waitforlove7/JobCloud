@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import jobsPayload from "../example.json" with { type: "json" };
-import { buildJobGraph, classifyJob, cleanJobTitle, extractSkills, jobsMatchingAllSkills, rankSkillTriples } from "./jobGraph.js";
+import {
+  buildJobGraph,
+  classifyJob,
+  cleanJobTitle,
+  extractSkills,
+  jobsMatchingAllSkills,
+  rankSkillTriples,
+  sortRelatedJobs,
+} from "./jobGraph.js";
 
 test("builds graph from example.json", () => {
   const graph = buildJobGraph(jobsPayload);
@@ -190,6 +198,21 @@ test("extracts storage middleware from slash-separated text", () => {
   assert.ok(skills.includes("Pika"));
   assert.ok(skills.includes("Ceph"));
   assert.ok(skills.includes("NoSQL"));
+});
+
+test("merges message queue mentions into Redis without double counting", () => {
+  assert.deepEqual(extractSkills("熟悉消息队列和 MQ。"), ["Redis"]);
+
+  const graph = buildJobGraph({
+    items: [
+      { job_id: "queue-only", title: "后端开发工程师", requirement: "熟悉消息队列" },
+      { job_id: "redis-and-queue", title: "后端开发工程师", requirement: "熟悉 Redis 和 MQ" },
+    ],
+  });
+  const redis = graph.skills.find((skill) => skill.label === "Redis");
+
+  assert.equal(graph.skills.some((skill) => skill.label === "消息队列"), false);
+  assert.equal(redis.count, 2);
 });
 
 test("extracts specific agent and AIGC skills independently", () => {
@@ -387,6 +410,18 @@ test("adds JS/TS to every frontend job", () => {
 
   assert.equal(frontendJavaScriptJobs.length, frontendJobs.length);
   assert.ok(javascript.count >= frontendJobs.length);
+});
+
+test("prioritizes full-stack titles only in frontend related jobs", () => {
+  const jobs = [
+    { id: "frontend", label: "前端开发工程师" },
+    { id: "english", label: "Senior Full-Stack Engineer" },
+    { id: "normal", label: "Web 工程师" },
+    { id: "chinese", label: "全栈研发工程师" },
+  ];
+
+  assert.deepEqual(sortRelatedJobs(jobs, "frontend").map((job) => job.id), ["english", "chinese", "frontend", "normal"]);
+  assert.deepEqual(sortRelatedJobs(jobs, "backend").map((job) => job.id), ["frontend", "english", "normal", "chinese"]);
 });
 
 test("handles empty descriptions and requirements", () => {

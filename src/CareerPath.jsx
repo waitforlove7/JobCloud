@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { sortRelatedJobs } from "./jobGraph.js";
 
 export function CareerPath({
   routes,
@@ -128,7 +129,9 @@ export function CareerPath({
 export function CareerPanel({ graph, route, progress, masteredSkillIds, onToggleSkill }) {
   const mastered = useMemo(() => new Set(masteredSkillIds), [masteredSkillIds]);
   const category = graph.categories.find((item) => item.key === route.categoryKey);
-  const relatedJobs = category ? graph.jobsByCategory.get(category.id) || [] : [];
+  const relatedJobs = category
+    ? sortRelatedJobs(graph.jobsByCategory.get(category.id) || [], category.key)
+    : [];
 
   return (
     <aside className="info-panel career-info-panel">

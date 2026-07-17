@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { graphForSelection, jobsMatchingAllSkills } from "./jobGraph.js";
+import { useI18n } from "./i18n.jsx";
 
 const TYPE_STYLE = {
   category: { emissive: 0x113344, opacity: 1 },
@@ -10,6 +11,7 @@ const TYPE_STYLE = {
 };
 
 export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, layerView, skillCategoryFilterId }) {
+  const { t } = useI18n();
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const objectsRef = useRef(new Map());
@@ -40,6 +42,12 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
     ),
     [graph, expandedCategoryId, selectedSkillId, selectedSkillIds, skillCategoryFilterId],
   );
+  const localizedSceneGraph = useMemo(() => ({
+    ...sceneGraph,
+    nodes: sceneGraph.nodes.map((node) => (
+      node.type === "category" || node.type === "skill" ? { ...node, label: t(node.label) } : node
+    )),
+  }), [sceneGraph, t]);
 
   const highlighted = useMemo(
     () => buildHighlightSet(graph, selected, skillCategoryFilterId, selectedSkillIds),
@@ -53,11 +61,13 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
     const skills = activeSkillIds.map((skillId) => graph.nodeById.get(skillId)).filter(Boolean);
     const jobCount = jobsMatchingAllSkills(graph, activeSkillIds).length;
     return {
-      label: skills.length > 1 ? "技能组合" : "技能",
-      title: skills.map((skill) => skill.label).join(" + "),
-      description: skills.length > 1 ? `同时满足这些技能的岗位共 ${jobCount} 个。` : `该技能被 ${jobCount} 个岗位提到。`,
+      label: skills.length > 1 ? t("技能组合") : t("技能"),
+      title: skills.map((skill) => t(skill.label)).join(" + "),
+      description: skills.length > 1
+        ? t("同时满足这些技能的岗位共 {count} 个。", { count: jobCount })
+        : t("该技能被 {count} 个岗位提到。", { count: jobCount }),
     };
-  }, [graph, selected, selectedSkillIds]);
+  }, [graph, selected, selectedSkillIds, t]);
 
   useEffect(() => {
     selectedRef.current = selected;
@@ -109,7 +119,7 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
     scene.add(fill);
 
     addReferenceRings(scene);
-    createGraphObjects(scene, sceneGraph, objectsRef.current, linesRef.current);
+    createGraphObjects(scene, localizedSceneGraph, objectsRef.current, linesRef.current);
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
@@ -222,7 +232,7 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
       objectsRef.current.clear();
       linesRef.current = [];
     };
-  }, [sceneGraph]);
+  }, [localizedSceneGraph]);
 
   useEffect(() => {
     applyHighlight(objectsRef.current, linesRef.current, highlighted, skillVisuals);
@@ -239,7 +249,7 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
             ...node.skillIds
               .map((id) => graph.nodeById.get(id))
               .filter(Boolean)
-              .map((skill) => ({ id: skill.id, type: "skill", label: skill.label })),
+              .map((skill) => ({ id: skill.id, type: "skill", label: t(skill.label) })),
           ]
         : [];
 
@@ -251,7 +261,7 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
         element.dataset.nodeId = item.id;
 
         const type = document.createElement("span");
-        type.textContent = item.type === "skill" ? "" : typeLabel(item.type);
+        type.textContent = item.type === "skill" ? "" : typeLabel(item.type, t);
         if (item.type === "skill") type.hidden = true;
         const label = document.createElement("strong");
         label.textContent = item.label;
@@ -259,21 +269,21 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
         return element;
       }),
     );
-  }, [graph, selected]);
+  }, [graph, selected, t]);
 
   return (
-    <div className="galaxy" ref={mountRef} aria-label="岗位技能三维关系图">
+    <div className="galaxy" ref={mountRef} aria-label={t("岗位技能三维关系图")}>
       <div className="skill-heat-legend" aria-hidden="true">
-        <span style={{ "--heat-color": "#6ee7a8" }}>低频</span>
-        <span style={{ "--heat-color": "#d6e85f" }}>中低</span>
-        <span style={{ "--heat-color": "#ffb347" }}>中高</span>
-        <span style={{ "--heat-color": "#ff5f57" }}>高频</span>
+        <span style={{ "--heat-color": "#6ee7a8" }}>{t("低频")}</span>
+        <span style={{ "--heat-color": "#d6e85f" }}>{t("中低")}</span>
+        <span style={{ "--heat-color": "#ffb347" }}>{t("中高")}</span>
+        <span style={{ "--heat-color": "#ff5f57" }}>{t("高频")}</span>
       </div>
       <div className="job-heat-legend" aria-hidden="true">
-        <strong>岗位技能数</strong>
-        <span>少</span>
+        <strong>{t("岗位技能数")}</strong>
+        <span>{t("少")}</span>
         <i />
-        <span>多</span>
+        <span>{t("多")}</span>
       </div>
       {skillSelectionSummary ? (
         <div className="skill-selection-summary" aria-live="polite">
@@ -284,7 +294,7 @@ export function JobGalaxy({ graph, selected, selectedSkillIds = [], onSelect, la
       ) : null}
       {tooltip ? (
         <div className="tooltip" style={{ left: tooltip.x + 14, top: tooltip.y + 14 }}>
-          <span>{typeLabel(tooltip.type)}</span>
+          <span>{typeLabel(tooltip.type, t)}</span>
           {tooltip.label}
         </div>
       ) : null}
@@ -661,10 +671,10 @@ function disposeScene(scene) {
   });
 }
 
-function typeLabel(type) {
-  if (type === "category") return "大类";
-  if (type === "job") return "职位";
-  return "技能";
+function typeLabel(type, t) {
+  if (type === "category") return t("大类");
+  if (type === "job") return t("职位");
+  return t("技能");
 }
 
 function inactiveNodeOpacity(nodeType, selectedType) {

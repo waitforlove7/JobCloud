@@ -471,8 +471,10 @@ export function searchJobs(graph, query, limit = 10) {
       const context = [
         title,
         category?.label || "",
+        category?.key || "",
         skillText,
         job.sourceLabel || job.source,
+        job.source,
         ...job.locations,
       ].join(" ").normalize("NFKC").toLocaleLowerCase();
       if (!tokens.every((token) => context.includes(token))) return null;

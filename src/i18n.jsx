@@ -5,6 +5,8 @@ const EN = {
   "加载数据": "Loading data",
   "正在加载岗位数据...": "Loading job data...",
   "请稍候，正在获取公司招聘信息。": "Please wait while company recruitment data is prepared.",
+  "正在切换数据源...": "Switching data source...",
+  "当前布局保持不变，新图谱准备完成后将自动更新。": "The layout stays in place and will update when the new graph is ready.",
   "看见岗位之间的": "See the connections",
   "隐形连接": "between jobs",
   "把分散的职位描述变成一张可探索的技能星图。快速比较岗位大类、技能热度与职业方向，找到下一步最值得投入的能力。": "Turn scattered job descriptions into an explorable skill galaxy. Compare job categories, skill demand, and career directions to identify what to learn next.",

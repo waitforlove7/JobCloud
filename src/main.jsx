@@ -150,7 +150,7 @@ function App({ language, onLanguageChange }) {
     setSkillViewMode(nextMode);
   }, []);
 
-    if (!graph || loading) {
+  if (!graph) {
     return (
       <main className="app-shell">
         <header className="site-header">
@@ -193,7 +193,7 @@ function App({ language, onLanguageChange }) {
           <strong>GoodJob</strong>
           <small>Web Mining Group1</small>
         </a>
-        <JobSearch graph={graph} onSelect={handleSelect} />
+        <JobSearch graph={graph} onSelect={handleSelect} disabled={loading} />
         <LanguageToggle language={language} onChange={onLanguageChange} />
       </header>
 
@@ -213,9 +213,9 @@ function App({ language, onLanguageChange }) {
         </div>
       </section>
 
-      <section className="workspace" id="explore">
+      <section className={`workspace${loading ? " is-loading" : ""}`} id="explore" aria-busy={loading}>
         <div className="visualization-column">
-          <CompanyToolbar companyKey={companyKey} onChange={handleCompanyChange} />
+          <CompanyToolbar companyKey={companyKey} onChange={handleCompanyChange} disabled={loading} />
           <div className="scene-wrap">
             <ViewToggle activeView={layerView} onChange={handleLayerViewChange} />
             {layerView === "skill" && (
@@ -237,6 +237,13 @@ function App({ language, onLanguageChange }) {
                 skillCategoryFilterId={selectedNode?.type === "skill" ? skillCategoryFilterId : null}
               />
             )}
+            {loading ? (
+              <div className="scene-loading-overlay" role="status" aria-live="polite">
+                <div className="loading-spinner" />
+                <strong>{t("正在切换数据源...")}</strong>
+                <span>{t("当前布局保持不变，新图谱准备完成后将自动更新。")}</span>
+              </div>
+            ) : null}
           </div>
         </div>
         {layerView === "skill" && skillViewMode === "dag" ? (

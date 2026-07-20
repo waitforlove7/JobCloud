@@ -1,0 +1,330 @@
+--- page 1 ---
+Lecture 2
+Cross-Industry Standard
+Process for Data Mining
+(CRISP-DM) & Predictive
+Analytics I
+Lek Hsiang Hui
+(hsianghui@nus.edu.sg)
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 1
+--- page 2 ---
+Outline for Today
+SWS3023 Web Mining
+1 CRISP-DM & MLOps
+Evolution of the data mining lifecycle 2 Simple Linear Regression
+Modeling single predictor relationships
+3 Multiple Predictors
+Multi-linear combinations 4
+Coding Scheme for
+Categorical Variables
+Handling qualitative predictors
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 2
+--- page 3 ---
+Part 1: CRISP-DM & MLOps
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 3
+--- page 4 ---
+CRISP-DM
+Cross-industry standard process for data mining (CRISP-DM) breaks the process of
+data mining into 6 major phases:
+1. Business Understanding 2. Data Understanding 3. Data Preparation
+4. Modeling 5. Evaluation 6. Deployment
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 4
+--- page 5 ---
+Steps 1 Business Understanding
+1. Business Understanding: Start with the business problem, NOT the data.
+Define objectives, requirements, and preliminary plan.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 5
+--- page 6 ---
+ Class Discussion
+Why do you think "Business Understanding" is often cited as the phase where most
+data science projects fail?
+Take 2 minutes to discuss with your neighbor:
+What happens if you skip this step?
+Can a perfect model still fail the business?
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 6
+--- page 7 ---
+Steps 2 – Data Understanding
+2. Data Understanding: Identify and explore relevant data.
+Perform Exploratory Data Analysis (EDA).
+Apply statistical analysis and visualize the data to grasp underlying patterns.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 7
+--- page 8 ---
+Hands-on: EDA - Q1
+Download and access: Regression.ipynb
+import statsmodels.api as sm
+import pandas as pd
+import matplotlib.pyplot as plt
+data = pd.read_csv("Advertising.csv")
+data.plot.scatter(x="TV", y="Sales", c="red", figsize=(20,15))
+(Output shows TV, Radio, Newspaper, Sales columns for various instances)
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 8
+--- page 9 ---
+Step 3 – Data Preparation
+Transforming real-world data into well-formed data:
+Data Consolidation: Collect, select, and integrate data.
+Data Cleaning: Impute missing values, reduce noise, handle inconsistencies.
+Data Transformation: Normalize, discretize, or construct new attributes.
+Data Reduction: Reduce dimensionality, balance skewed data.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 9
+--- page 10 ---
+Steps 4 & 5 – Modeling & Evaluation
+4. Model Building: Apply and compare analytical techniques.
+Techniques vary based on data form and task (e.g., numeric constraints, classification
+vs. regression).
+5. Testing and Evaluation: Assess model performance.
+Regression: Measure distance from actual values.
+Classification: Evaluate accuracy and error rates.
+We typically divide data into training/testing sets and use K-Fold Cross
+Validation.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 10
+--- page 11 ---
+Step 6 – Deployment to MLOps
+Traditionally, deployment involved generating a static report or model.
+Today, this phase has evolved into Machine Learning Operations (MLOps).
+CI/CD/CT: Continuous Integration, Continuous Deployment, and Continuous Training
+to automatically update models as new data arrives.
+Preventing Model Drift: Ensuring models don't degrade over time due to shifting real-
+world conditions.
+Observability: Real-time monitoring of model decisions and latency in production
+environments.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 11
+--- page 12 ---
+ Class Discussion: Model Drift
+If we train a model today to predict house prices, will it still be accurate in 5 years?
+Discuss:
+1. What factors might cause the model to degrade?
+2. How can MLOps pipelines automatically detect and solve this?
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 12
+--- page 13 ---
+Part 2: Simple Linear Regression
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 13
+--- page 14 ---
+Advertising Example
+Suppose we hypothesize that there is a relationship between Sales and amount spend on
+TV advertisement.
+TV Advertising ($) ➔Sales Output
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 14
+--- page 15 ---
+Simple Linear Regression
+Simple linear regression assumes that there is a single predictor variable  and the
+relationship between the response  and  is linear.
+: Intercept
+: Slope
+This model contains 2 unknown constants that we aim to find.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 15
+--- page 16 ---
+Advertising Example
+Assume that there is a linear relationship between Sales and amount spend on TV
+advertisement:
+Want to see how the spending on TV advertisement can affect Sales
+How to estimate  and ?
+Using training data (supervised learning)
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 16
+--- page 17 ---
+Training Data (Advertising.csv)
+# TV (Thousands $)Sales (Thousands Units)
+1 230.1 22.1
+2 44.5 10.4
+3 17.2 9.3
+... ... ...
+200 237.4 12.5
+200 observations total.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 17
+--- page 18 ---
+Least Squares Criterion
+We fit a line that minimizes the sum of squared errors between the actual values and
+predicted values.
+Where  (the residual for each observation).
+ and  are estimated by minimizing this least squares criterion.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 18
+--- page 19 ---
+Least Squares Fit
+Let  be the prediction for  based on the -th value of .
+Residual Sum of Squares (RSS):
+Where 
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 19
+--- page 20 ---
+Visualizing the Fit
+Interpretation:
+1 unit spent on TV ($1000) is associated with selling approximately
+ units.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 20
+--- page 21 ---
+Hands-on: Regression
+Download and access: Regression.ipynb
+Code snippet for fitting regression using statsmodels :
+import statsmodels.api as sm
+# Assuming 'data' contains TV and Sales
+X = sm.add_constant(data['TV'])
+model = sm.OLS(data['Sales'], X)
+results = model.fit()
+print(results.summary())
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 21
+--- page 22 ---
+Useful Predictors
+To determine whether a predictor is useful:
+We check whether the p-value of the coefficient estimate is 
+Low p-value  coefficient estimate is statistically significant.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 22
+--- page 23 ---
+Model Summary
+A typical OLS Regression Results table gives several key metrics:
+coef: The estimated coefficients ( , )
+P>|t| (p-value): Checks statistical significance. Both intercept and TV have .
+R-squared: 
+Adj. R-squared: 
+F-statistic: 
+Df Residuals: 
+Computed as  degrees of freedom. (Lost 2 degrees
+because we estimate  and ).
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 23
+--- page 24 ---
+Measure Model Performance
+To measure the quality of fit (of the entire model), we can use:
+1. 
+2. F-statistics
+3. Mean Squared Error (MSE)
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 24
+--- page 25 ---
+ measures the proportion of variability in  that can be explained using .
+Takes value between 0 and 1.
+Value close to 0  regression did not explain much of the variability in the response
+(linear model likely to be wrong).
+In the Advertising dataset,  61% of the variability in Sales is explained
+by a linear regression on TV.
+What is a "good"  value depends on the application.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 25
+--- page 26 ---
+Adjusted 
+ will always increase with more variables.
+Thus, not really a good way to evaluate the effectiveness of the predictors when
+adding many of them.
+Adjusted  factors into the number of predictors in the calculation of . (Penalizes
+cases where many irrelevant predictors are added).
+Adjusted  is always lesser than or equal to .
+This is often used instead of regular  for multiple predictors.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 26
+--- page 27 ---
+F-Statistics
+F-Statistics is another test to determine whether there is a relationship between the
+response and the predictors.
+Value close to 1  no relationship between the response and predictors.
+Value much larger than 1  likely to find relationship between the response and
+predictors.
+More importantly, look at the p-value for the F-statistic to determine if it is significant.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 27
+--- page 28 ---
+Mean Squared Error (MSE)
+While  and F-statistics give a rough idea of how effective the regression model is, they
+do not tell how much the error is.
+The prediction error is sometimes more important.
+Mean Squared Error (MSE) measures the prediction accuracy/error.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 28
+--- page 29 ---
+Part 3: Multiple Predictors
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 29
+--- page 30 ---
+Multi Linear Regression
+In practice, we would have more than 1 predictor.
+TV Advertising
+Radio Advertising
+Newspaper Advertising
+How do they jointly affect Sales?
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 30
+--- page 31 ---
+Advertising Example (Multiple Predictors)
+Suppose we hypothesize that there might be a linear relationship between Sales and
+amount spend on TV, Radio, Newspaper advertisement.
+ are the coefficients that quantify the association between TV, Radio,
+Newspaper spending on the Sales (response).
+ is the average effect on  for one unit increase in  while keeping the other
+predictors fixed.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 31
+--- page 32 ---
+Part 4: Coding Scheme for Categorical Variables
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 32
+--- page 33 ---
+Qualitative Predictors
+Regression requires the attributes to be quantitative (i.e. numerical).
+Need to specially handle qualitative predictors.
+Example dataset (Credit.csv):
+Predictors: Income, Limit, Rating, Cards, Age, Education, Gender, Student, Married,
+Ethnicity
+Target: Balance (average credit card debt balance)
+Notice that Gender, Student, Married, and Ethnicity are categorical (qualitative).
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 33
+--- page 34 ---
+Coding Scheme & Interpretation (2 Categories)
+Example: Gender variable (male, female). Create a dummy variable:
+ (if female),  (if male).
+Regression Model:
+This results in:
+If female:
+If male: (Males are the "baseline")
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 34
+--- page 35 ---
+Coding Scheme & Interpretation (2 Categories)
+Interpretation:
+ is the average difference in credit card balance between females and males for a
+given income level.
+The coding scheme (whether male=1 or female=1) will not affect the overall
+interpretation and fit of the regression; it just changes the baseline.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 35
+--- page 36 ---
+Coding Scheme (  Categories)
+If there are  ( ) values, create  dummy variables.
+Example: Ethnicity (Asian, Caucasian, African American)
+ if Asian,  otherwise
+ if Caucasian,  otherwise
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 36
+--- page 37 ---
+Coding Scheme (  Categories)
+How about African American?
+If a person is neither Asian nor Caucasian, they are African American (
+).
+If Asian: 
+If Caucasian: 
+If African American:  (Baseline)
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 37
+--- page 38 ---
+What's Next?
+Predictive Analytics II
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 38

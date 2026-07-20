@@ -1,0 +1,439 @@
+--- page 1 ---
+Lecture 3 Predictive
+Analytics II
+Lek Hsiang Hui (hsianghui@nus.edu.sg)
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 1
+--- page 2 ---
+Outline for Today
+From traditional methods to modern LLM predictors and unsupervised learning
+1 Traditional Models
+Bayes, KNN, Trees, SVM & Neural Nets 2 LLMs & Prompt Engineering
+Zero-shot, few-shot, and modern prompt design
+3 Model Performance
+Resampling & Cross-Validation 4 Clustering
+Finding hidden subgroups & K-Means
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 2
+--- page 3 ---
+Recall: Classification (Supervised)
+Using existing data instances (labeled) to learn a model for predicting subsequent
+instances (unlabeled)
+Example:
+Assume that you have some attributes of the current weather, and we need to decide
+whether to go out to play.
+outlook: rainy
+temperature: mild
+humidity: high
+windy: TRUE
+➔Classifier ➔ play: ?
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 3
+--- page 4 ---
+Part 1: Traditional Classification Models
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 4
+--- page 5 ---
+Traditional Classification Approaches
+A
+Naïve Bayes
+Probabilistic classification using statistical
+relationships
+B K-Nearest Neighbors
+Classify based on closest neighbors in data
+C Decision Trees
+Split data based on feature thresholds D Support Vector Machines
+Find optimal separating hyperplane
+E Neural Networks
+Learn patterns through interconnected layers
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 5
+--- page 6 ---
+1. Probabilistic Methods: Introduction
+Bayesian methods are probabilistic classification models. Instead of rigid labels, they
+predict the probability of each class given the input data ().
+Input (x)
+outlook: rainy
+temp: mild
+➔
+Probabilities P(y|x)
+P(yes | x) = 80%
+P(no | x) = 20%
+➔
+Prediction (y )
+play = yes
+Rule: Always pick the class with the highest probability!
+max
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 6
+--- page 7 ---
+1. Probabilistic Methods: Email Spam Classification
+Goal: Classify an email as Spam or Not Spam.
+Input Email (x)
+"Congratulations! You won
+a free lottery!"
+➔
+Evaluate P(y|x)
+P(Spam | x) = 95%
+P(Not Spam | x) = 5%
+➔
+Decision (y )
+Spam
+max
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 7
+--- page 8 ---
+1. Bayesian Methods: Bayes' Theorem
+To calculate the posterior probability , Bayesian methods make use of Bayes'
+theorem to transform this into another form:
+where:
+ = predictors
+ = target
+The denominator  is the probability of the predictors, which acts as a normalizing
+constant.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 8
+--- page 9 ---
+1. Bayesian Methods: Simplifying the Equation
+Assume there are 3 classes ( ). We calculate:
+Notice that all of them are divided by the same denominator .
+It doesn't affect the  decision! We only need to maximize the numerator:
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 9
+--- page 10 ---
+1. Naïve Bayes Classifiers: Chain Rule
+To calculate the likelihood , we can use the chain rule of probability.
+For predictors :
+Calculating these conditional probabilities directly from data is very difficult without
+massive datasets.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 10
+--- page 11 ---
+1. Naïve Bayes Classifiers: Conditional Independence
+Naïve Bayes makes the strong assumption of conditional independence: each attribute
+ is conditionally independent of every other attribute  (for ), given the class .
+After conditional independence assumption:
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 11
+--- page 12 ---
+1. Naïve Bayes Example: Weather Data
+Outlook TemperatureHumidity Wind Play
+Sunny Hot High Weak No
+Sunny Hot High Strong No
+Overcast Hot High Weak Yes
+Rain Mild High Weak Yes
+... (14 rows of data)
+Goal: Given {Outlook = Sunny, Temp. = Cool, Humidity = High, Wind = Strong}
+Play = ?
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 12
+--- page 13 ---
+---
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 13
+--- page 14 ---
+1. Naïve Bayes Example: Calculation
+Calculating Proportional Posteriors:
+P(Yes)
+P(No)
+Result: Since , Play = No
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 14
+--- page 15 ---
+1. Naïve Bayes Classifiers: Summary
+Impact of the conditional independence assumption:
+Training becomes very easy and fast - just need to consider each attribute in each
+class separately and build up a table of the prior probabilities and conditional
+probabilities.
+Testing is also easy – just look up the tables and calculate the probability for each
+class.
+Conclusion:
+A popular machine learning algorithm which is fast with competitive performance
+(accuracy) compared to other state-of-the-art classifiers.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 15
+--- page 16 ---
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 16
+--- page 17 ---
+KNN Classification Animation
+0:00/ 0:12
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 17
+--- page 18 ---
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 18
+--- page 19 ---
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 19
+--- page 20 ---
+SVM Learning Animation
+0:00/ 0:12
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 20
+--- page 21 ---
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 21
+--- page 22 ---
+The Shift in Predictive Analytics
+While traditional models are powerful and computationally efficient for structured data,
+they require:
+Extensive feature engineering
+Large amounts of task-specific labeled data
+Model retraining for new categories
+The Modern Paradigm (2026):
+We are increasingly moving towards Foundation Models that can perform predictive
+analytics out-of-the-box using natural language interfaces, dramatically reducing the time-
+to-value for new classification tasks.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 22
+--- page 23 ---
+Part 2: Large Language Models & Prompt Engineering
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 23
+--- page 24 ---
+Large Language Models as Predictors
+LLMs are not just for generating text; they are powerful predictive engines. By framing
+classification tasks as text completion, LLMs can predict classes without traditional
+training.
+Key Advantages:
+Zero-Shot Classification: Predict classes without seeing any training examples.
+Few-Shot Classification: Provide a few examples in the prompt to drastically improve
+accuracy.
+Unstructured Data Mastery: Excellently handles text, sentiment, and intent directly
+without complex preprocessing.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 24
+--- page 25 ---
+Zero-Shot Classification
+The model is given a task description and the input data, but no examples of the desired
+output.
+Example: "Classify this review as Positive or Negative: 'The service was terrible.'" ->
+Prediction: Negative
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 25
+--- page 26 ---
+Few-Shot Classification
+The model is given a few examples of inputs and outputs before being asked to predict
+the new instance.
+Example:
+"Review: 'Great food' -> Sentiment: Positive
+Review: 'Too loud' -> Sentiment: Negative
+Review: 'Long wait time' -> Sentiment: ?" -> Prediction: Negative
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 26
+--- page 27 ---
+Prompt Engineering for Predictive Analytics
+In the LLM era, Prompt Engineering has emerged as a core predictive analytics technique.
+It replaces traditional model tuning with prompt design.
+Modern Techniques:
+1. Chain-of-Thought (CoT): Asking the model to "think step-by-step" before making a
+prediction improves reasoning and accuracy.
+2. Instruction Tuning: Carefully crafting the persona, constraints, and output format
+(e.g., JSON) to integrate LLM predictions into automated data pipelines.
+3. Retrieval-Augmented Generation (RAG): Providing dynamic context to the LLM to
+make predictions based on up-to-date, domain-specific information.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 27
+--- page 28 ---
+Example: LLM Predictive Pipeline
+Prompt:
+Extract entities and
+predict churn risk (High/Low)
+User: "App keeps crashing!"
+➔ LLM API ➔
+{
+"risk": "High",
+"reason": "stability"
+}
+This completely bypasses traditional NLP pipelines (tokenization, feature extraction,
+model training) while achieving state-of-the-art predictive performance.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 28
+--- page 29 ---
+Part 3: Assessing Model Performance
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 29
+--- page 30 ---
+Classification Setting & Accuracy
+In the classification setting, we have a list of pre-defined categories that we want to
+classify each observation into.
+For classification, one common measure for assessing the model accuracy is Accuracy:
+Where  if , and  otherwise.
+Basically, the proportion of correct classification instances over all the instances.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 30
+--- page 31 ---
+Model Evaluation: The Problem
+We generally train a model on Training Data and evaluate it on Testing Data.
+Problems with a single split approach:
+Difficult to evaluate the accuracy/performance of a model or a learning method if
+testing data is not readily available.
+Performance of a model depends heavily on the specific training data chosen.
+Solution:
+Make use of Resampling Methods
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 31
+--- page 32 ---
+Resampling Methods
+Idea:
+Find the performance by running the experiment multiple times (using the same training
+set S).
+For each run:
+1. Draw a subset of S for training ( ) and a subset of S for testing ( ).
+2. Generate a model using  and evaluate on .
+Performance = Average of the multiple runs.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 32
+--- page 33 ---
+Resampling Methods
+Advantages:
+Can evaluate the model even though we do not have any external testing data.
+Can ensure that the training data we are using is good (not biased or noisy).
+Allows us to better evaluate a model's true performance.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 33
+--- page 34 ---
+Resampling Method 1: Validation Set Approach
+Randomly split the training data into training and validation (testing) datasets.
+E.g., 50% for training, 50% for testing (sample with replacement)
+Advantages:
+Simple and easy to implement.
+Disadvantages:
+The validation estimation of the test error rate can be highly variable.
+Depends entirely on which observations are included in the training vs validation set.
+Only a subset of observations (training data) are used to fit the model. Models trained
+on smaller datasets tend to perform worse.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 34
+--- page 35 ---
+Resampling Method 2: Leave-One-Out (LOOCV)
+Idea:
+Similar to the validation set approach except that only 1 observation is used for validation
+and the remaining  observations are used for training.
+The error rate is the average of the  runs.
+Advantages:
+Less bias (compared to the validation set approach) as almost all data is used for
+training.
+Less variable error rate/MSE.
+Disadvantages:
+Computationally expensive. Need to run the model training  times.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 35
+--- page 36 ---
+Resampling Method 3: K-Fold Cross-Validation
+An alternative to LOOCV and commonly used for evaluating model performance.
+Instead of splitting the data , randomly divide the set of observations into 
+groups (or -fold) each with approximately equal size.
+The first fold is treated as a validation set, and the remaining  folds are used for
+training.
+The accuracy is calculated based on the average of the  runs.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 36
+--- page 37 ---
+Resampling Method 3: K-Fold Cross-Validation
+Properties:
+Hybrid approach between validation set approach and LOOCV.
+Less computationally expensive compared to LOOCV.
+Common value:  (10-Fold Cross Validation).
+LOOCV is actually a special case of k-fold cross-validation where .
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 37
+--- page 38 ---
+Part 4: Clustering
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 38
+--- page 39 ---
+Supervised vs Unsupervised Learning
+Supervised Learning
+We have labeled (training) data.
+Use the labeled data to train a model for predicting the response on the unlabeled
+(testing) data.
+Accuracy is always better than (or at least as good as) unsupervised learning.
+Not scalable (large amount of labeled data is not always available – nice idea but not
+practical).
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 39
+--- page 40 ---
+Supervised vs Unsupervised Learning
+Unsupervised Learning
+We do not have labeled data; we only have access to unlabeled data (usually in large
+amounts).
+We want to either label the unlabeled observations or group them into subgroups.
+More scalable (large amount of unlabeled data readily available).
+Example:
+Assume we have access to a large collection of tweets. Can we group the tweets into
+similar interests (e.g. Tech, Politics, Singapore, NUS)? The list is not pre-defined.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 40
+--- page 41 ---
+Why Unsupervised Learning?
+Since we already have the supervised learning approach, why do we still need
+unsupervised learning?
+Unlabeled data is usually readily available (easy problem + able to get large amounts).
+Access to large amounts of training data is rarely available.
+Creating training data (i.e. labeling the unlabeled data manually by hand) is very
+tedious and not scalable.
+Unsupervised learning approaches do not require data to be labeled but still can
+perform similar grouping tasks.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 41
+--- page 42 ---
+Clustering
+Clustering is an example of an unsupervised learning approach.
+It refers to the broad set of techniques for finding similar subgroups, or clusters in a data
+set.
+A good clustering is when the observations within the same cluster are similar to
+each other but different compared to other clusters.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 42
+--- page 43 ---
+Clustering
+Applications of Clustering
+Marketing: Discover distinct groups in customer bases and develop targeted
+marketing.
+Medical: Discover different types of cancer by clustering the data.
+Web Search: Grouping words together to suggest related terms.
+Social Network: Identifying trending topics.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 43
+--- page 44 ---
+K-Means Clustering
+There are many clustering methods, but we will focus on the most commonly used
+approach: K-means Clustering.
+K-means clustering requires the user to supply the desired number of clusters ( ). The
+observations are then grouped into one of these  clusters.
+The K-means clustering algorithm partitions the data into  clusters ( ):
+1. Each observation belongs to one of the  clusters.
+2. The clusters are non-overlapping. i.e., no observation belongs to more than one
+cluster.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 44
+--- page 45 ---
+K-Means Clustering: The Objective
+Idea: a good cluster = one where the within-cluster variation is as small as possible (i.e.
+elements within a cluster should be as similar as possible).
+Where  is the within-cluster variation for cluster , often measured using squared
+Euclidean distance:
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 45
+--- page 46 ---
+K-Means Algorithm
+1. Initialize: Randomly assign observations to  clusters and compute initial centroids.
+2. Iterate until convergence:
+Compute the centroid for each cluster.
+Reassign each observation to the nearest centroid (Euclidean distance).
+Note: Results depend on random initialization. Run multiple times with different starting
+points to avoid local optima.
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 46
+--- page 47 ---
+K-Means Clustering: Visual Animation
+0:00/ 0:30
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 47
+--- page 48 ---
+What's Next?
+Mining Web Content I
+©2026 Lek Hsiang Hui. All rights reserved. No part of this document may be reproduced or transmitted in any form or by any
+means, electronic or otherwise, without prior written permission of the owner. 48

@@ -1,0 +1,69 @@
+### code
+import statsmodels.api as sm
+import pandas as pd
+import matplotlib.pyplot as plt
+
+### markdown
+# Plot the points
+
+### markdown
+Plot the points to get a sensing of the data. What sort of relationship 
+
+#### ❓Q1. What sort of relationship are we seeing between `TV` and `Sales`?
+
+### markdown
+# Using Statsmodels
+
+### code
+#add the y-intercept
+X = sm.add_constant(X)
+modelTv = sm.OLS(y, X).fit()
+
+### code
+modelTv.summary()
+
+### markdown
+## Add the regression line onto the scatter plot
+
+### code
+#first get the coefficient estimates
+y_intercept = modelTv.params[0]
+print(y_intercept)
+
+tv = modelTv.params[1]
+print(tv)
+
+### code
+# X = data["TV"]
+# X = sm.add_constant(X)
+# predictions = modelTv.predict(X)
+predictions = data["TV"] * tv + y_intercept
+predictions
+
+### markdown
+## Calculate the Mean Square Error (MSE)
+
+### code
+degrees_freedom = len(y) - len(modelTv.params)
+degrees_freedom
+
+### markdown
+## Consider TV, Radio, and Newspaper
+
+### code
+modelRadio = sm.OLS(y, sm.add_constant(data[["TV", "Radio", "Newspaper"]])).fit()
+modelRadio.summary()
+
+### markdown
+# Using Scikit-learn
+
+### code
+from sklearn.linear_model import LinearRegression
+
+### code
+lm = LinearRegression()
+lm.fit(X,y)
+
+### code
+#adjusted R2 value
+lm.score(X,y)

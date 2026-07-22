@@ -96,15 +96,16 @@ export function buildSkillDagModel(graph) {
       categoryId: category.id,
     }));
   });
-  const skills = graph.skills;
+  const relevantSkillIds = new Set(edges.map((edge) => edge.skillId));
+  const skills = graph.skills.filter((skill) => relevantSkillIds.has(skill.id));
   const skillByLabel = new Map(graph.skills.map((skill) => [skill.label, skill]));
   const skillGroups = SKILL_GROUPS.map(({ skills, ...group }) => ({
     ...group,
     skills: skills
       .map((label) => skillByLabel.get(label))
-      .filter(Boolean),
+      .filter((skill) => skill && relevantSkillIds.has(skill.id)),
   }));
-  const skillMemberships = new Map(graph.skills.map((skill) => [
+  const skillMemberships = new Map(skills.map((skill) => [
     skill.id,
     skillGroups.filter((group) => group.skills.some((item) => item.id === skill.id)).map((group) => group.id),
   ]));

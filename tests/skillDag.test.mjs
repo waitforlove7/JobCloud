@@ -43,11 +43,13 @@ test("fuzzy skill matching supports substrings, separators, typos, and reset", (
   assert.equal(skillMatchesQuery("Python", ""), false);
 });
 
-test("builds a DAG with every skill and without product or other endpoints", () => {
+test("builds a DAG with only skills connected to category constellations", () => {
   const graph = buildJobGraph(jobsPayload);
   const model = buildSkillDagModel(graph);
+  const linkedSkillIds = new Set(model.edges.map((edge) => edge.skillId));
 
-  assert.equal(model.skills.length, graph.skills.length);
+  assert.deepEqual(new Set(model.skills.map((skill) => skill.id)), linkedSkillIds);
+  assert.ok(model.skills.length < graph.skills.length);
   assert.equal(model.categories.some((category) => category.key === "product"), false);
   assert.equal(model.categories.some((category) => category.key === "other"), false);
   assert.ok(model.edges.length > 0);
@@ -59,8 +61,8 @@ test("groups skills for DAG and handles uncovered skills", () => {
   const clusteredSkillIds = model.skillGroups.flatMap((group) => group.skills.map((skill) => skill.id));
   const python = graph.skills.find((skill) => skill.label === "Python");
 
-  assert.ok(new Set(clusteredSkillIds).size >= graph.skills.length - 15, "at most 15 skills may be outside DAG groups");
-  assert.ok(clusteredSkillIds.length > graph.skills.length);
+  assert.ok(new Set(clusteredSkillIds).size >= model.skills.length - 15, "at most 15 visible skills may be outside DAG groups");
+  assert.ok(clusteredSkillIds.length > model.skills.length);
   assert.deepEqual(model.skillMemberships.get(python.id), ["languages", "ai-model"]);
   assert.deepEqual(model.skillGroups.slice(0, 2).map((group) => group.label), ["基础语言", "Web 与客户端"]);
 });

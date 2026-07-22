@@ -245,6 +245,17 @@ a {
   font-size: 11px;
 }
 
+.search-results > .search-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px;
+  border-top: 1px solid rgba(123, 231, 221, 0.12);
+  color: #7be7dd;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .search-results > p {
   margin: 0;
   padding: 22px 12px;
@@ -2629,7 +2640,8 @@ a {
   border: 1px solid rgba(189, 211, 230, 0.14);
   border-radius: 8px;
   background: rgba(9, 20, 29, 0.97);
-  overflow: hidden;
+  max-height: min(380px, 55vh);
+  overflow-y: auto;
   box-shadow: 0 12px 36px rgba(0,0,0,0.35);
 }
 .p-search-item {
@@ -2649,6 +2661,21 @@ a {
 .p-search-item:hover { background: rgba(123, 231, 221, 0.06); }
 .p-search-item strong { display: block; font-size: 13px; font-weight: 600; }
 .p-search-item span { font-size: 11px; color: #6e8599; }
+.p-search-more {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-top: 1px solid rgba(123, 231, 221, 0.12);
+  background: rgba(123, 231, 221, 0.03);
+  color: #7be7dd;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+.p-search-more:hover { background: rgba(123, 231, 221, 0.09); }
 
 .p-target-cards {
   display: flex;

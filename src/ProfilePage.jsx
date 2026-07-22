@@ -4,12 +4,14 @@ import { extractSkills, jobsMatchingAllSkills, scoreJobsBySkills, searchJobs } f
 import { loadProfile, saveProfile } from "./profileStore.js";
 import { BriefcaseBusiness, Building2, Sparkles, Upload, FileText, Search, X, CheckCircle, Target, BookOpen, TrendingUp, Zap } from "lucide-react";
 
+const TARGET_SEARCH_PAGE_SIZE = 8;
+
 export function ProfilePage({ graph, profileTargets, profileMasteredSkillIds, onAddTarget, onRemoveTarget, onToggleProfileSkill, onClose }) {
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchLimit, setSearchLimit] = useState(8);
+  const [searchLimit, setSearchLimit] = useState(TARGET_SEARCH_PAGE_SIZE);
   const searchRef = useRef(null);
   const [activeTargetIdx, setActiveTargetIdx] = useState(0);
 
@@ -109,8 +111,18 @@ export function ProfilePage({ graph, profileTargets, profileMasteredSkillIds, on
   const handleSearchInput = (e) => {
     const q = e.target.value;
     setSearchQuery(q);
-    if (q.trim() && graph) { setSearchLimit(8); setSearchResults(searchJobs(graph, q, searchLimit)); setSearchOpen(true); }
+    if (q.trim() && graph) {
+      setSearchLimit(TARGET_SEARCH_PAGE_SIZE);
+      setSearchResults(searchJobs(graph, q, TARGET_SEARCH_PAGE_SIZE + 1));
+      setSearchOpen(true);
+    }
     else { setSearchResults([]); setSearchOpen(false); }
+  };
+
+  const handleShowMoreSearchResults = () => {
+    const nextLimit = searchLimit + TARGET_SEARCH_PAGE_SIZE;
+    setSearchLimit(nextLimit);
+    setSearchResults(searchJobs(graph, searchQuery, nextLimit + 1));
   };
 
   const handleSelectJob = (job) => {
@@ -204,12 +216,17 @@ export function ProfilePage({ graph, profileTargets, profileMasteredSkillIds, on
             </div>
             {searchOpen && searchResults.length > 0 && (
               <div className="p-search-dropdown">
-                {searchResults.map(job => (
+                {searchResults.slice(0, searchLimit).map(job => (
                   <button key={job.id} type="button" className="p-search-item" onClick={() => handleSelectJob(job)}>
                     <strong>{job.label}</strong>
                     <span>{job.sourceLabel}</span>
                   </button>
                 ))}
+                {searchResults.length > searchLimit && (
+                  <button type="button" className="p-search-more" onClick={handleShowMoreSearchResults}>
+                    {t("显示更多")}
+                  </button>
+                )}
               </div>
             )}
           </div>

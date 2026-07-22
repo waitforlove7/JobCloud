@@ -409,15 +409,19 @@ function LanguageToggle({ language, onChange }) {
 }
 
 function JobSearch({ graph = null, onSelect, disabled = false }) {
+  const pageSize = 12;
   const { t } = useI18n();
   const rootRef = useRef(null);
   const inputRef = useRef(null);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [resultLimit, setResultLimit] = useState(pageSize);
   const results = useMemo(
-    () => (graph && query.trim() ? searchJobs(graph, query, 12) : []),
-    [graph, query],
+    () => (graph && query.trim() ? searchJobs(graph, query, resultLimit + 1) : []),
+    [graph, query, resultLimit],
   );
+  const visibleResults = results.slice(0, resultLimit);
+  const hasMoreResults = results.length > resultLimit;
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -434,7 +438,7 @@ function JobSearch({ graph = null, onSelect, disabled = false }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (results[0]) selectJob(results[0]);
+    if (visibleResults[0]) selectJob(visibleResults[0]);
   };
 
   return (
@@ -452,6 +456,7 @@ function JobSearch({ graph = null, onSelect, disabled = false }) {
           aria-controls="job-search-results"
           onChange={(event) => {
             setQuery(event.target.value);
+            setResultLimit(pageSize);
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
@@ -469,6 +474,7 @@ function JobSearch({ graph = null, onSelect, disabled = false }) {
             aria-label={t("清除搜索")}
             onClick={() => {
               setQuery("");
+              setResultLimit(pageSize);
               inputRef.current?.focus();
             }}
           >
@@ -480,8 +486,8 @@ function JobSearch({ graph = null, onSelect, disabled = false }) {
         <div className="search-results" id="job-search-results" role="listbox">
           {results.length > 0 ? (
             <>
-              <div className="search-results-count">{t("显示最相关的 {count} 个岗位角色", { count: results.length })}</div>
-              {results.map((job) => {
+              <div className="search-results-count">{t("显示最相关的 {count} 个岗位角色", { count: visibleResults.length })}</div>
+              {visibleResults.map((job) => {
                 const category = graph.nodeById.get(job.categoryId);
                 return (
                   <button
@@ -497,6 +503,15 @@ function JobSearch({ graph = null, onSelect, disabled = false }) {
                   </button>
                 );
               })}
+              {hasMoreResults ? (
+                <button
+                  className="search-more"
+                  type="button"
+                  onClick={() => setResultLimit((current) => current + pageSize)}
+                >
+                  {t("显示更多")}
+                </button>
+              ) : null}
             </>
           ) : (
             <p>{t("没有匹配的岗位角色")}</p>

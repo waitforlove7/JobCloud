@@ -25,6 +25,7 @@ const EN = {
   "搜索岗位": "Search jobs",
   "清除搜索": "Clear search",
   "显示最相关的 {count} 个岗位角色": "Showing the {count} most relevant job roles",
+  "显示更多": "Show more",
   "其他": "Other",
   "{count} 个招聘发布": "{count} job posting(s)",
   "没有匹配的岗位角色": "No matching job roles",

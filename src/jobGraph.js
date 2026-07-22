@@ -797,7 +797,7 @@ function aliasMatches(text, aliasConfig) {
   // 优先精确包含（最可靠）
   if (flags === "i" ? text.toLowerCase().includes(alias.toLowerCase()) : text.includes(alias)) return true;
   // 规范化后包含（处理"分布式"→"分布式系统"这类后缀差异）
-  return normalizedText.includes(normalizedAlias) || normalizedAlias.includes(normalizedText.slice(0, normalizedText.length));
+  return Boolean(normalizedAlias) && normalizedText.includes(normalizedAlias);
 }
 
 function cleanText(value) {

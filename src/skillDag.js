@@ -2,14 +2,14 @@ const EXCLUDED_CATEGORY_KEYS = new Set(["product", "other"]);
 const PROGRAMMING_LANGUAGE_LABELS = new Set(["Python", "C/C++", "Go", "Java", "JS/TS", "Rust"]);
 const SKILL_GROUPS = [
   { id: "languages", label: "基础语言", color: "#5b8cff", skills: ["Python", "C/C++", "Go", "Java", "JS/TS", "Rust"] },
-  { id: "web-client", label: "Web 与客户端", color: "#32d6c7", skills: ["Android", "iOS", "Flutter", "Swift", "React", "Vue", "Svelte", "Webpack/Vite", "HTML/CSS", "JS/TS"] },
+  { id: "web-client", label: "Web 与客户端", color: "#32d6c7", skills: ["Android", "iOS", "Flutter", "Swift", "React", "Vue", "Svelte", "Webpack/Vite", "HTML/CSS", "JS/TS", "Unity", "Unreal"] },
   { id: "backend", label: "后端架构", color: "#8b7cff", skills: ["分布式系统", "微服务", "RPC", "JS/TS", "Go", "Java", "Spring", "MyBatis", "MySQL", "Redis", "Kafka"] },
-  { id: "data", label: "数据工程", color: "#4dc9ff", skills: ["MySQL", "Redis", "NoSQL", "RocksDB", "Pika", "Ceph", "Kafka", "Spark", "Flink", "Hadoop", "Hive", "ClickHouse", "Doris", "HBase", "SQL", "数据仓库", "数据湖"] },
-  { id: "cloud", label: "云原生环境", color: "#6ee7a8", skills: ["Kubernetes", "Docker", "监控告警"] },
+  { id: "data", label: "数据工程", color: "#4dc9ff", skills: ["MySQL", "Redis", "NoSQL", "RocksDB", "Pika", "Ceph", "Kafka", "Spark", "Flink", "Hadoop", "Hive", "ClickHouse", "Doris", "HBase", "SQL", "数据仓库", "数据湖", "数据中心"] },
+  { id: "cloud", label: "云原生环境", color: "#6ee7a8", skills: ["Kubernetes", "Docker", "监控告警", "Git"] },
   { id: "ai-model", label: "AI 模型与算法", color: "#cf67ff", skills: ["TensorFlow", "PyTorch", "Transformer", "NLP", "CV", "LLM", "Fine-Tuning", "SFT", "RL", "RLHF", "机器学习", "深度学习", "推荐系统", "Python"] },
   { id: "ai-agent", label: "AI Agent 应用", color: "#ff66c4", skills: ["AIGC", "Multi Agent", "Agent Infra", "Tool Use", "Prompt Engineering", "LangGraph", "CrewAI", "OpenClaw", "Agent", "RAG", "ReAct", "LLM"] },
-  { id: "systems", label: "系统、网络与硬件", color: "#ffad5c", skills: ["Linux", "RTOS", "Sensor", "驱动开发", "PCIe", "RDMA", "TCP/IP", "BGP", "VXLAN", "IDA", "WinDBG", "XPERF", "NVML", "NVIDIA-SMI", "CUDA-GDB", "C/C++", "Rust"] },
-  { id: "quality", label: "测试与性能", color: "#ff6f78", skills: ["自动化测试", "性能优化", "JUnit"] },
+  { id: "systems", label: "系统、网络与硬件", color: "#ffad5c", skills: ["Linux", "RTOS", "Sensor", "驱动开发", "PCIe", "RDMA", "TCP/IP", "BGP", "VXLAN", "IDA", "WinDBG", "XPERF", "NVML", "NVIDIA-SMI", "CUDA-GDB", "C/C++", "Rust", "光通信", "服务器硬件", "PCB", "Camera/相机", "LLVM/编译器", "DDR", "IC验证", "ISP", "基带", "交换机", "射频", "5G/4G", "OTA", "WiFi/蓝牙"] },
+  { id: "quality", label: "测试与性能", color: "#ff6f78", skills: ["自动化测试", "性能优化", "JUnit", "质量管理", "DFX"] },
 ];
 
 export function buildSkillDagModel(graph) {
@@ -27,14 +27,13 @@ export function buildSkillDagModel(graph) {
       categoryId: category.id,
     }));
   });
-  const relevantSkillIds = new Set(edges.map((edge) => edge.skillId));
-  const skills = graph.skills.filter((skill) => relevantSkillIds.has(skill.id));
+  const skills = graph.skills;
   const skillByLabel = new Map(graph.skills.map((skill) => [skill.label, skill]));
   const skillGroups = SKILL_GROUPS.map(({ skills, ...group }) => ({
     ...group,
     skills: skills
       .map((label) => skillByLabel.get(label))
-      .filter((skill) => skill && relevantSkillIds.has(skill.id)),
+      .filter(Boolean),
   }));
   const skillMemberships = new Map(graph.skills.map((skill) => [
     skill.id,

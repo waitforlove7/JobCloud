@@ -111,6 +111,12 @@
     ]
   ],
   [
+    "Svelte",
+    [
+      "Svelte"
+    ]
+  ],
+  [
     "Webpack/Vite",
     [
       "Webpack",
@@ -179,6 +185,42 @@
     ]
   ],
   [
+    "VXLAN",
+    [
+      "VXLAN"
+    ]
+  ],
+  [
+    "WinDBG",
+    [
+      "WinDBG"
+    ]
+  ],
+  [
+    "XPERF",
+    [
+      "XPERF"
+    ]
+  ],
+  [
+    "NVML",
+    [
+      "NVML"
+    ]
+  ],
+  [
+    "NVIDIA-SMI",
+    [
+      "NVIDIA-SMI"
+    ]
+  ],
+  [
+    "CUDA-GDB",
+    [
+      "CUDA-GDB"
+    ]
+  ],
+  [
     "MySQL",
     [
       "MySQL",
@@ -206,6 +248,18 @@
     [
       "RocksDB",
       "Rocks DB"
+    ]
+  ],
+  [
+    "Pika",
+    [
+      "Pika"
+    ]
+  ],
+  [
+    "Ceph",
+    [
+      "Ceph"
     ]
   ],
   [

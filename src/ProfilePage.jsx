@@ -13,14 +13,13 @@ export function ProfilePage({ graph, profileTargets, profileMasteredSkillIds, on
   const searchRef = useRef(null);
   const [activeTargetIdx, setActiveTargetIdx] = useState(0);
 
-  const [resumeText, setResumeText] = useState("");
-  const [resumeKeywords, setResumeKeywords] = useState([]);
+  const [resumeText, setResumeText] = useState(() => loadProfile().resumeText);
+  const [resumeKeywords, setResumeKeywords] = useState(() => loadProfile().resumeKeywords);
   const [matchShowCount, setMatchShowCount] = useState(15);
   const [extracting, setExtracting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
-  useEffect(() => { const p = loadProfile(); setResumeText(p.resumeText); setResumeKeywords(p.resumeKeywords); }, []);
   useEffect(() => { saveProfile({ targets: profileTargets, profileMasteredSkillIds, resumeText, resumeKeywords }); }, [profileTargets, profileMasteredSkillIds, resumeText, resumeKeywords]);
 
   useEffect(() => {
@@ -196,9 +195,12 @@ export function ProfilePage({ graph, profileTargets, profileMasteredSkillIds, on
             </div>
           )}
           <div className="p-search-wrapper" ref={searchRef}>
-            <div className="p-search-row">
-              <Search size={14} />
-              <input type="text" value={searchQuery} onChange={handleSearchInput} onFocus={() => searchQuery.trim() && setSearchOpen(true)} placeholder={t("搜索并添加目标岗位...")} />
+            <div className={"p-search-row" + (searchQuery ? " has-query" : "")}>
+              <div className="p-search-placeholder" aria-hidden="true">
+                <Search size={14} />
+                <span>{t("搜索并添加目标岗位...")}</span>
+              </div>
+              <input type="text" value={searchQuery} onChange={handleSearchInput} onFocus={() => searchQuery.trim() && setSearchOpen(true)} aria-label={t("搜索并添加目标岗位...")} />
             </div>
             {searchOpen && searchResults.length > 0 && (
               <div className="p-search-dropdown">

@@ -7,6 +7,7 @@ import { buildJobGraph, jobsMatchingAllSkills, searchJobs, sortRelatedJobs } fro
 import { JobGalaxy } from "./JobGalaxy.jsx";
 import { SkillDag, SkillDagPanel } from "./SkillDag.jsx";
 import { ProfilePage } from "./ProfilePage.jsx";
+import { loadProfile } from "./profileStore.js";
 import "./styles.css";
 import { I18nProvider, useI18n } from "./i18n.jsx";
 import {
@@ -30,10 +31,18 @@ function App({ language, onLanguageChange }) {
   const [masteredSkillIds, setMasteredSkillIds] = useState([]);
   const [relatedJobId, setRelatedJobId] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [showProfile, setShowProfile] = useState(false);
-  const [profileTargets, setProfileTargets] = useState([]);
-  const [profileMasteredSkillIds, setProfileMasteredSkillIds] = useState([]);
+  const [showProfile, setShowProfile] = useState(
+    () => sessionStorage.getItem("goodjob_active_page") === "profile",
+  );
+  const [profileTargets, setProfileTargets] = useState(() => loadProfile().targets);
+  const [profileMasteredSkillIds, setProfileMasteredSkillIds] = useState(
+    () => loadProfile().profileMasteredSkillIds,
+  );
   const graphCache = useRef(new Map());
+
+  useEffect(() => {
+    sessionStorage.setItem("goodjob_active_page", showProfile ? "profile" : "main");
+  }, [showProfile]);
 
   const handleCompanyChange = useCallback((nextCompanyKey) => {
     setCompanyKey(nextCompanyKey);
@@ -189,25 +198,39 @@ function App({ language, onLanguageChange }) {
             <LanguageToggle language={language} onChange={onLanguageChange} />
           </div>
         </header>
-        <section className="workspace" id="explore">
-          <div className="visualization-column">
-            <CompanyToolbar
-              companyKey={companyKey}
-              onChange={handleCompanyChange}
-              disabled
+        {showProfile ? (
+          <div className="profile-shell">
+            <ProfilePage
+              graph={null}
+              profileTargets={profileTargets}
+              profileMasteredSkillIds={profileMasteredSkillIds}
+              onAddTarget={handleAddTarget}
+              onRemoveTarget={handleRemoveTarget}
+              onToggleProfileSkill={handleToggleProfileSkill}
+              onClose={() => setShowProfile(false)}
             />
-            <div className="scene-wrap">
-              <div className="loading-spinner" />
-            </div>
           </div>
-          <aside className="info-panel">
-            <div className="panel-section">
-              <p className="panel-kicker">{t("加载数据")}</p>
-              <h2>{t("正在加载岗位数据...")}</h2>
-              <p className="muted">{t("请稍候，正在获取公司招聘信息。")}</p>
+        ) : (
+          <section className="workspace" id="explore">
+            <div className="visualization-column">
+              <CompanyToolbar
+                companyKey={companyKey}
+                onChange={handleCompanyChange}
+                disabled
+              />
+              <div className="scene-wrap">
+                <div className="loading-spinner" />
+              </div>
             </div>
-          </aside>
-        </section>
+            <aside className="info-panel">
+              <div className="panel-section">
+                <p className="panel-kicker">{t("加载数据")}</p>
+                <h2>{t("正在加载岗位数据...")}</h2>
+                <p className="muted">{t("请稍候，正在获取公司招聘信息。")}</p>
+              </div>
+            </aside>
+          </section>
+        )}
       </main>
     );
   }
